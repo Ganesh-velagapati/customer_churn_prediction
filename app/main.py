@@ -1,5 +1,5 @@
 import streamlit as st
-from app.login import login
+from login import login
 
 # Page config
 st.set_page_config(page_title="Admin Dashboard", layout="wide")
