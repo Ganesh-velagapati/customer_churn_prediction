@@ -94,7 +94,13 @@ def predict_page():
         # ----------------------
         # Prediction
         # ----------------------
-        pred = model.predict(df)
+        for col in df.select_dtypes(include='object').columns:
+          if col in encoders:
+              df[col] = encoders[col].transform(df[col])
+        else:
+             from sklearn.preprocessing import LabelEncoder
+        le = LabelEncoder()
+        df[col] = le.fit_transform(df[col].astype(str))
         proba = model.predict_proba(df)
 
         # ----------------------
