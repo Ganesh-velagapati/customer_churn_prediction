@@ -1,28 +1,30 @@
 import streamlit as st
 import pandas as pd
 import joblib
-
+import os
 
 def predict_page():
 
-    st.title("🧪 Test Customer Churn Prediction")
+    st.title("🔍 Test Customer Churn Prediction")
 
-    # ----------------------
+    # --------------------
     # Load Model
-    # ----------------------
+    # --------------------
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
     try:
-        model = joblib.load("../models/model.pkl")
-        encoders = joblib.load("../models/encoders.pkl")
-        columns = joblib.load("../models/columns.pkl")
+        model = joblib.load(os.path.join(base_path, "models", "model.pkl"))
+        encoders = joblib.load(os.path.join(base_path, "models", "encoders.pkl"))
+        columns = joblib.load(os.path.join(base_path, "models", "columns.pkl"))
     except:
         st.error("⚠️ Train the model first!")
         return
 
     st.write("Enter customer details:")
 
-    # ----------------------
+    # --------------------
     # Input Form
-    # ----------------------
+    # --------------------
     col1, col2 = st.columns(2)
 
     data = {}
@@ -65,47 +67,43 @@ def predict_page():
         data["MonthlyCharges"] = st.number_input("Monthly Charges", value=50.0)
         data["TotalCharges"] = st.number_input("Total Charges", value=100.0)
 
-    # ----------------------
+    # --------------------
     # Prediction Button
-    # ----------------------
+    # --------------------
     if st.button("Predict"):
 
         df = pd.DataFrame([data])
 
-        # ----------------------
+        # --------------------
         # Encoding
-        # ----------------------
+        # --------------------
         for col in df.columns:
             if col in encoders:
                 le = encoders[col]
                 value = df[col].iloc[0]
-
                 if value in le.classes_:
                     df[col] = le.transform(df[col])
                 else:
-                    st.warning(f"Unknown value in {col}, using default")
                     df[col] = le.transform([le.classes_[0]])
 
         # Convert numeric
         df["tenure"] = df["tenure"].astype(float)
         df["MonthlyCharges"] = df["MonthlyCharges"].astype(float)
         df["TotalCharges"] = df["TotalCharges"].astype(float)
+        df["SeniorCitizen"] = df["SeniorCitizen"].astype(float)
 
-        # ----------------------
+        # Reorder columns to match training
+        df = df[columns]
+
+        # --------------------
         # Prediction
-        # ----------------------
-        for col in df.select_dtypes(include='object').columns:
-          if col in encoders:
-              df[col] = encoders[col].transform(df[col])
-        else:
-             from sklearn.preprocessing import LabelEncoder
-        le = LabelEncoder()
-        df[col] = le.fit_transform(df[col].astype(str))
+        # --------------------
+        pred = model.predict(df)
         proba = model.predict_proba(df)
 
-        # ----------------------
+        # --------------------
         # Output
-        # ----------------------
+        # --------------------
         st.subheader("📊 Prediction Result")
 
         colA, colB = st.columns(2)
@@ -121,9 +119,9 @@ def predict_page():
         else:
             st.success("🟢 Customer will STAY")
 
-        # ----------------------
+        # --------------------
         # DYNAMIC LOCAL EXPLANATION
-        # ----------------------
+        # --------------------
         st.subheader("🧠 Why this prediction?")
 
         importances = model.feature_importances_
@@ -135,7 +133,6 @@ def predict_page():
 
         # CHURN CASE
         if pred[0] == 1:
-
             if "tenure" in top_features and data["tenure"] < 12:
                 reasons.append("Low tenure contributed to churn")
 
@@ -153,7 +150,6 @@ def predict_page():
 
         # STAY CASE
         else:
-
             if "tenure" in top_features and data["tenure"] >= 12:
                 reasons.append("Higher tenure supports customer retention")
 
