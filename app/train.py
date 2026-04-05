@@ -10,7 +10,8 @@ from imblearn.over_sampling import SMOTE
 
 def train_model():
     print("\n🔹 Loading dataset...")
-    data = pd.read_csv("../data/churn.csv")
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data = pd.read_csv(os.path.join(base_path, "data", "churn.csv"))
 
     print("🔹 Cleaning data...")
     data.drop("customerID", axis=1, inplace=True)
@@ -49,11 +50,10 @@ def train_model():
     print(f"📊 Accuracy: {acc:.4f}")
 
     print("🔹 Saving model and files...")
-    os.makedirs("../models", exist_ok=True)
-    joblib.dump(model, "../models/model.pkl")
-    joblib.dump(encoders, "../models/encoders.pkl")
-    joblib.dump(X.columns.tolist(), "../models/columns.pkl")
-
+    os.makedirs(os.path.join(base_path, "models"), exist_ok=True)
+    joblib.dump(model, os.path.join(base_path, "models", "model.pkl"))
+    joblib.dump(encoders, os.path.join(base_path, "models", "encoders.pkl"))
+    joblib.dump(X.columns.tolist(), os.path.join(base_path, "models", "columns.pkl"))
     print("✅ Model saved successfully!\n")
 
     return acc
