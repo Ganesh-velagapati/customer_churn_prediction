@@ -69,6 +69,11 @@ def train_page():
             print("Applying SMOTE...")
             st.write("🔹 Applying SMOTE (balancing data)...")
 
+            from sklearn.preprocessing import LabelEncoder
+            for col in X.select_dtypes(include='object').columns:
+                le = LabelEncoder()
+                X[col] = le.fit_transform(X[col].astype(str))
+
             sm = SMOTE(random_state=42)
             X, y = sm.fit_resample(X, y)
 
