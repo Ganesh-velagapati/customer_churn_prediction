@@ -1,5 +1,8 @@
 import sys
 import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import sys
+import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 import streamlit as st
 from app.login import login
@@ -74,3 +77,4 @@ elif menu == "Logout":
     st.session_state["logged_in"] = False
     st.success("Logged out successfully!")
     st.rerun()
+
