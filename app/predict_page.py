@@ -87,9 +87,9 @@ def predict_page():
                     df[col] = le.transform([le.classes_[0]])
 
         # Convert numeric
-        df["tenure"] = float(df["tenure"])
-        df["MonthlyCharges"] = float(df["MonthlyCharges"])
-        df["TotalCharges"] = float(df["TotalCharges"])
+        df["tenure"] = df["tenure"].astype(float)
+        df["MonthlyCharges"] = df["MonthlyCharges"].astype(float)
+        df["TotalCharges"] = df["TotalCharges"].astype(float)
 
         # ----------------------
         # Prediction
